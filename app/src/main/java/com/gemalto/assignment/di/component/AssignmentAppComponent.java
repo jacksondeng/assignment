@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.gemalto.assignment.AssignmentApp;
 import com.gemalto.assignment.di.module.ActivityBindingModule;
+import com.gemalto.assignment.di.module.DataModule;
 import com.gemalto.assignment.di.module.NetworkModule;
 
 import javax.inject.Singleton;
@@ -20,7 +21,7 @@ import dagger.android.support.AndroidSupportInjectionModule;
 
 @Singleton
 @Component(modules = {AndroidSupportInjectionModule.class, AndroidInjectionModule.class,
-        ActivityBindingModule.class,NetworkModule.class} )
+        ActivityBindingModule.class,NetworkModule.class, DataModule.class} )
 
 public interface AssignmentAppComponent {
     @Component.Builder

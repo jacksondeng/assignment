@@ -8,11 +8,11 @@ import com.google.gson.annotations.SerializedName;
 
 public class Username {
     @SerializedName("title")
-    private String title;
+    private String title="";
     @SerializedName("first")
-    private String firstName;
+    private String firstName="";
     @SerializedName("last")
-    private String lastName;
+    private String lastName="";
 
     public String getTitle() {
         return title;
@@ -24,5 +24,11 @@ public class Username {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public Username(String username){
+        this.title = username.split(" ")[0];
+        this.firstName = username.split(" ")[1];
+        this.lastName = username.split(" ")[2];
     }
 }

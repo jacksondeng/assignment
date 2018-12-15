@@ -1,6 +1,7 @@
 package com.gemalto.assignment.di.module;
 
 import com.gemalto.assignment.MainActivity;
+import com.gemalto.assignment.UserDashboardActivity;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -14,4 +15,7 @@ import dagger.android.ContributesAndroidInjector;
 public abstract class ActivityBindingModule {
     @ContributesAndroidInjector
     abstract MainActivity contributeToMainActivity();
+
+    @ContributesAndroidInjector
+    abstract UserDashboardActivity contributeToUserDashboardActivity();
 }

@@ -3,10 +3,7 @@ package com.gemalto.assignment.api;
 import com.gemalto.assignment.data.Urls;
 
 import io.reactivex.Observable;
-import okhttp3.RequestBody;
-import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 /**
