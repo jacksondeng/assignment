@@ -10,33 +10,33 @@
         app:layout_constraintVertical_bias="0.15"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/padding_left_15dp"
+        android:paddingStart="@dimen/padding_left_15dp"
         android:id="@+id/username"
         android:textStyle="bold"
         android:gravity="start"
         android:textSize="@dimen/username_size"
-        android:text="username"/>
+        android:text="@string/user_name"/>
 
     <TextView
         app:layout_constraintTop_toBottomOf="@id/username"
         app:layout_constraintVertical_bias="0.2"
-        android:paddingLeft="@dimen/padding_left_15dp"
+        android:paddingStart="@dimen/padding_left_15dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/gender"
         android:gravity="start"
         android:textSize="@dimen/gender_size"
-        android:text="gender"/>
+        android:text="@string/user_gender"/>
     
     <TextView
         app:layout_constraintTop_toBottomOf="@id/gender"
         app:layout_constraintVertical_bias="0.2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/padding_left_15dp"
+        android:paddingStart="@dimen/padding_left_15dp"
         android:id="@+id/email"
         android:gravity="start"
         android:textSize="@dimen/email_size"
-        android:text="email"/>
+        android:text="@string/user_email"/>
 
 </android.support.constraint.ConstraintLayout>

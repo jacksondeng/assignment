@@ -12,12 +12,6 @@ import java.util.List;
  */
 
 public class ApiResponse {
-    /*@SerializedName("results")
-    private List<JsonObject> userDetails;
-    public List<JsonObject> getUserDetails(){
-        return this.userDetails;
-    };*/
-
     @SerializedName("results")
     private List<User> users;
     public List<User> getUser(){

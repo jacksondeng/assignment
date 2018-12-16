@@ -1,17 +1,23 @@
 package com.gemalto.assignment;
 
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.gemalto.assignment.data.User;
 import com.gemalto.assignment.db.UserDb;
 import com.gemalto.assignment.repository.UserRepository;
+import com.jakewharton.rxbinding3.view.RxView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 import dagger.android.AndroidInjection;
 import dagger.android.support.DaggerAppCompatActivity;
@@ -24,6 +30,7 @@ import timber.log.Timber;
 
 public class UserDashboardActivity extends DaggerAppCompatActivity {
 
+    private Toolbar toolbar;
     private TextView userId;
     private TextView userName;
     private TextView userGender;
@@ -36,9 +43,7 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
     private ImageView profilePic;
 
     @Inject
-    UserDb userDb;
-    @Inject
-    UserRepository userRepository;
+    GemaltoApi gemaltoApi;
 
 
     @Override
@@ -68,6 +73,7 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
 
     private void initViews(){
         initBindings();
+        initToolbar();
         userId.setText(user.getSeed());
         userName.setText(user.getrealUsername());
         userGender.setText(user.getGender());
@@ -86,17 +92,23 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
     }
 
     private void initListeners(){
-        btnStore.setOnClickListener(view -> {
-            user.setIsStored(1);
-            storeUser(user);
-        });
+        RxView.clicks(btnDelete)
+                .throttleFirst(1000, TimeUnit.MILLISECONDS)
+                .subscribe(unit -> {
+                    gemaltoApi.deleteUser(user);
+                    finish();
+                });
 
-        btnDelete.setOnClickListener(view ->{
-            deleteUser(user);
-        });
+        RxView.clicks(btnStore)
+                .throttleFirst(1000, TimeUnit.MILLISECONDS)
+                .subscribe(unit -> {
+                    gemaltoApi.storeUser(user);
+                    finish();
+                });
     }
 
     private void initBindings(){
+        toolbar = findViewById(R.id.toolbar);
         userId = findViewById(R.id.user_id);
         userName = findViewById(R.id.user_name);
         userGender = findViewById(R.id.user_gender);
@@ -108,27 +120,11 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
         profilePic = findViewById(R.id.profile_pic);
     }
 
-    private void storeUser(final User user){
-        new Thread(() -> {
-            userDb.userDao().storeUser(user);
-            listStoredUsers();
-        }).start();
-    }
-
-    private void deleteUser(final User user){
-        new Thread(() -> {
-            userDb.userDao().deleteUser(user);
-            listStoredUsers();
-        }).start();
-    }
-
-    private void listStoredUsers(){
-        new Thread(() -> {
-            List<User> users;
-            users = userDb.userDao().listAllUsers();
-            userRepository.getQueriedUsers().postValue(users);
-            finish();
-        }) .start();
+    private void initToolbar(){
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void loadProfilePic(){
@@ -143,5 +139,16 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
                 Timber.tag("Picasso load failed ").d(" ");
             }
         });
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -15,13 +15,22 @@ import javax.inject.Singleton;
 
 @Singleton
 public class UserRepository  {
-    private MutableLiveData<List<User>> queriedUsers = new MutableLiveData<>();
+    private MutableLiveData<List<User>> remoteUsers = new MutableLiveData<>();
+    private MutableLiveData<List<User>> localUsers = new MutableLiveData<>();
 
-    public MutableLiveData<List<User>> getQueriedUsers() {
-        return queriedUsers;
+    public MutableLiveData<List<User>> getRemoteUsers() {
+        return remoteUsers;
     }
 
-    public void setQueriedUsers(MutableLiveData<List<User>> queriedUsers) {
-        this.queriedUsers = queriedUsers;
+    public void setRemoteUsers(MutableLiveData<List<User>> queriedUsers) {
+        this.remoteUsers = queriedUsers;
+    }
+
+    public MutableLiveData<List<User>> getLocalUsers() {
+        return localUsers;
+    }
+
+    public void setLocalUsers(MutableLiveData<List<User>> localUsers) {
+        this.localUsers = localUsers;
     }
 }

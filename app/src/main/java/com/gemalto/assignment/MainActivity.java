@@ -1,29 +1,27 @@
 package com.gemalto.assignment;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.widget.Toast;
-
-
-import com.gemalto.assignment.api.ApiResponse;
-import com.gemalto.assignment.api.GemaltoApi;
-import com.gemalto.assignment.data.User;
-import com.gemalto.assignment.db.UserDb;
-import com.gemalto.assignment.repository.UserRepository;
-
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import com.jakewharton.rxbinding3.view.RxView;
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
-
 import dagger.android.AndroidInjection;
 import dagger.android.support.DaggerAppCompatActivity;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by jacksondeng on 15/12/18.
@@ -32,17 +30,15 @@ import io.reactivex.schedulers.Schedulers;
 public class MainActivity extends DaggerAppCompatActivity {
 
     @Inject
-    UserRepository userRepository;
-    @Inject
     GemaltoApi gemaltoApi;
-    @Inject
-    UserDb userDb;
-
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
-    private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private NavigationView navigationView;
+    private Spinner genderSpinner;
+    private Button btnQuery;
+    private String gender;
+    private EditText multipleUserEt,seedEt;
+    private Dialog loadingDialog;
 
 
     @Override
@@ -51,7 +47,19 @@ public class MainActivity extends DaggerAppCompatActivity {
         AndroidInjection.inject(this);
         setContentView(R.layout.activity_main);
         initViews();
-        userRepository.getQueriedUsers().observe(this, this::setRecyclerView);
+        gemaltoApi.getUserRepository().getLocalUsers().observe(this,users -> startActivity(new Intent(this,ListStoredUsersActivity.class)));
+        gemaltoApi.getUserRepository().getRemoteUsers().observe(this,users -> startActivity(new Intent(this,ListQueryUsersActivity.class)));
+        gemaltoApi.getApiSuccess().observe(this , apiSuccess->{
+           if(apiSuccess != null && apiSuccess){
+               dismissSpinnerDialog();
+           }
+        });
+        gemaltoApi.getShowNetworkError().observe(this , showNetworkErr->{
+            if(showNetworkErr != null && showNetworkErr){
+                dismissSpinnerDialog();
+                promptRetryDialog();
+            }
+        });
     }
 
     @Override
@@ -62,7 +70,6 @@ public class MainActivity extends DaggerAppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        listStoredUsers();
     }
 
     @Override
@@ -77,21 +84,25 @@ public class MainActivity extends DaggerAppCompatActivity {
 
 
     private void initViews(){
-        initRecyclerView();
+        initBindings();
+        initSpinner();
         initToolbar();
+        initListeners();
         initNavigationView();
         initDrawerLayout();
     }
 
-    private void initRecyclerView(){
-        recyclerView = findViewById(R.id.user_recycler_view);
-        recyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(mLayoutManager);
+    private void initBindings(){
+        toolbar = findViewById(R.id.toolbar);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+        genderSpinner = findViewById(R.id.gender_spinner);
+        btnQuery = findViewById(R.id.btn_query);
+        multipleUserEt = findViewById(R.id.multiple_user_et);
+        seedEt = findViewById(R.id.seed_et);
     }
 
     private void initToolbar(){
-        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
@@ -99,7 +110,6 @@ public class MainActivity extends DaggerAppCompatActivity {
     }
 
     private void initDrawerLayout(){
-        drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
@@ -107,7 +117,6 @@ public class MainActivity extends DaggerAppCompatActivity {
     }
 
     private void initNavigationView(){
-        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
             switch(id)
@@ -121,6 +130,7 @@ public class MainActivity extends DaggerAppCompatActivity {
                     drawerLayout.closeDrawers();
                     return true;
                 case R.id.exit:
+                    finish();
                     drawerLayout.closeDrawers();
                     return true;
                 default:
@@ -130,28 +140,90 @@ public class MainActivity extends DaggerAppCompatActivity {
     }
 
     private void queryUser(){
-        gemaltoApi.getMultipleRandomUsers(10)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(apiResponse -> {
-                    for(User user : apiResponse.getUser()){
-                        user.setSeed(apiResponse.getInfo().getSeed());
-                    }
-                    setRecyclerView(apiResponse.getUser());
-                });
-    }
-
-    private void setRecyclerView(List<User> users){
-        mAdapter = new UserRecyclerViewAdapter(users);
-        recyclerView.setAdapter(mAdapter);
+        showLoadingDialog();
+        gemaltoApi.getUsers(gender,getSeed(),getMultiple());
+        //gemaltoApi.getUserRepository().getRemoteUsers().call();
     }
 
     private void listStoredUsers(){
-        new Thread(() -> {
-            List<User> users;
-            users = userDb.userDao().listAllUsers();
-            userRepository.getQueriedUsers().postValue(users);
-        }) .start();
+        gemaltoApi.listStoredUsers();
+        //gemaltoApi.getUserRepository().getLocalUsers().call();
+    }
+
+    private void initListeners(){
+        RxView.clicks(btnQuery)
+                .throttleFirst(1000, TimeUnit.MILLISECONDS)
+                .subscribe(unit -> {
+                    queryUser();
+                });
+    }
+
+    private void initSpinner(){
+        List<String> genderList = new ArrayList<>();
+        genderList.add("Male");
+        genderList.add("Female");
+        ArrayAdapter<String> genderAdapter = new ArrayAdapter<>
+                (this, android.R.layout.simple_spinner_item, genderList);
+        genderSpinner.setAdapter(genderAdapter);
+        genderSpinner.setSelection(0);
+        genderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                genderSpinner.setSelection(position);
+                gender = genderList.get(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private String getMultiple(){
+        String multiple = multipleUserEt.getText().toString();
+        if(multiple.length()>0 && multiple.matches("[0-9]+")){
+            int result = Integer.valueOf(multiple);
+            if(result<=5000 && result>0){
+                return multiple;
+            }
+        }
+        return "";
+    }
+
+    private String getSeed(){
+        Timber.d("SeedEt " + seedEt.getText());
+        if(seedEt.getText().length()>0){
+            return seedEt.getText().toString();
+        }
+        return "";
+    }
+
+    private void showLoadingDialog() {
+        if(loadingDialog == null) {
+            loadingDialog = new Dialog(this, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+        }
+        loadingDialog.setCancelable(false);
+        loadingDialog.setContentView(R.layout.dialog_api);
+        loadingDialog.show();
+    }
+
+    public void dismissSpinnerDialog(){
+        if(loadingDialog!=null && loadingDialog.isShowing())
+        {
+            loadingDialog.dismiss();
+        }
+    }
+
+    public void promptRetryDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.network_timeout))
+                .setMessage(getString(R.string.try_again))
+                .setPositiveButton(getString(R.string.retry), (dialogInterface, i) -> queryUser())
+                .setNeutralButton(getString(R.string.cancel), null);
+        AlertDialog dialog = builder.create();
+        dialog.setCancelable(false);
+        dialog.show();
     }
 
 }

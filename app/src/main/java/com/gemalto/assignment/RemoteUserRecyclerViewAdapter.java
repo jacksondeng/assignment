@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -16,7 +15,7 @@ import java.util.List;
  * Created by jacksondeng on 15/12/18.
  */
 
-public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerViewAdapter.ViewHolder> {
+public class RemoteUserRecyclerViewAdapter extends RecyclerView.Adapter<RemoteUserRecyclerViewAdapter.ViewHolder> {
     private List<User> users;
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView username;
@@ -29,18 +28,15 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
             username = constraintLayout.findViewById(R.id.username);
             gender = constraintLayout.findViewById(R.id.gender);
             email = constraintLayout.findViewById(R.id.email);
-            constraintLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(view.getContext(),UserDashboardActivity.class);
-                    intent.putExtra("user",user);
-                    view.getContext().startActivity(intent);
-                }
+            constraintLayout.setOnClickListener(view -> {
+                Intent intent = new Intent(view.getContext(),UserDashboardActivity.class);
+                intent.putExtra("user",user);
+                view.getContext().startActivity(intent);
             });
         }
     }
 
-    public UserRecyclerViewAdapter(List<User> users) {
+    public RemoteUserRecyclerViewAdapter(List<User> users) {
         this.users = users;
     }
 

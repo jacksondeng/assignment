@@ -1,5 +1,7 @@
 package com.gemalto.assignment.di.module;
 
+import com.gemalto.assignment.ListQueryUsersActivity;
+import com.gemalto.assignment.ListStoredUsersActivity;
 import com.gemalto.assignment.MainActivity;
 import com.gemalto.assignment.UserDashboardActivity;
 
@@ -18,4 +20,10 @@ public abstract class ActivityBindingModule {
 
     @ContributesAndroidInjector
     abstract UserDashboardActivity contributeToUserDashboardActivity();
+
+    @ContributesAndroidInjector
+    abstract ListQueryUsersActivity contributeToListQueryUsersActivity();
+
+    @ContributesAndroidInjector
+    abstract ListStoredUsersActivity contributeToListStoredUsersActivity();
 }

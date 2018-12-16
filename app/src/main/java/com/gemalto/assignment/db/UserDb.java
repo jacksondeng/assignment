@@ -14,7 +14,7 @@ import javax.inject.Singleton;
  */
 
 
-@Database(entities = {User.class} , version =9 , exportSchema = false)
+@Database(entities = {User.class} , version =10 , exportSchema = false)
 @TypeConverters({Converters.class})
 @Singleton
 public abstract class UserDb extends RoomDatabase{

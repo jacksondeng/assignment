@@ -1,7 +1,6 @@
 package com.gemalto.assignment.di.module;
 
-import com.gemalto.assignment.BuildConfig;
-import com.gemalto.assignment.api.GemaltoApi;
+import com.gemalto.assignment.api.GemaltoApiInterface;
 import com.gemalto.assignment.data.Urls;
 
 import java.util.concurrent.TimeUnit;
@@ -35,8 +34,8 @@ public class NetworkModule {
     public OkHttpClient provideOkHttpClient(HttpLoggingInterceptor interceptor) {
         return new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
                 .build();
     }
 
@@ -53,8 +52,8 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    public GemaltoApi provideGemaltoApi(Retrofit retrofit){
-        return retrofit.create(GemaltoApi.class);
+    public GemaltoApiInterface provideGemaltoApi(Retrofit retrofit){
+        return retrofit.create(GemaltoApiInterface.class);
     }
 
 }
