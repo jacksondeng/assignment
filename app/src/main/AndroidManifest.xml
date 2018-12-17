@@ -39,14 +39,6 @@
             android:name=".ListStoredUsersActivity"
             android:label="@string/title_activity_list_stored_users"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".AuthActivity"
-            android:label="@string/title_activity_auth"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name="com.gemalto.gemaltoapi.di.module.BaseActivity"
-            android:label="@string/title_activity_base"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

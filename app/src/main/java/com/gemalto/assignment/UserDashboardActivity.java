@@ -39,7 +39,7 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
     private Button btnStore;
     private Button btnDelete;
     private ImageView profilePic;
-
+    private boolean btnClicked = false;
     @Inject
     GemaltoApi gemaltoApi;
 
@@ -52,6 +52,7 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
         user = getIntent().getParcelableExtra("user");
         initViews();
         initListeners();
+        initObservers();
     }
 
     @Override
@@ -94,14 +95,14 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
                 .throttleFirst(1000, TimeUnit.MILLISECONDS)
                 .subscribe(unit -> {
                     gemaltoApi.deleteUser(user);
-                    finish();
+                    btnClicked = true;
                 });
 
         RxView.clicks(btnStore)
                 .throttleFirst(1000, TimeUnit.MILLISECONDS)
                 .subscribe(unit -> {
                     gemaltoApi.storeUser(user);
-                    finish();
+                    btnClicked = true;
                 });
     }
 
@@ -148,5 +149,15 @@ public class UserDashboardActivity extends DaggerAppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void initObservers(){
+        gemaltoApi.getUserRepository().getLocalUsers().observe(this,
+                users -> {
+                    if(btnClicked) {
+                        finish();
+                        btnClicked = false;
+                    }
+                });
     }
 }
