@@ -39,13 +39,17 @@ public class Dob {
     }
 
     private void calculateAge(String dob){
-        Timber.d("11JODAA " + dob);
-        if(!validateDate(dob,"yyyy-MM-dd'T'HH:mm:ssZ")){
+        if(validateDate(dob,"dd MMM yyyy")){
             dob = changeDateFormat(dob,"dd MMM yyyy","yyyy-MM-dd'T'HH:mm:ssZ");
+            DateTime currentTime = new DateTime(System.currentTimeMillis());
+            DateTime dateTime = new DateTime(dob);
+            this.age = currentTime.getYear() - dateTime.getYear();
         }
-        DateTime currentTime = new DateTime(System.currentTimeMillis());
-        DateTime dateTime = new DateTime(dob);
-        this.age = currentTime.getYear() - dateTime.getYear();
+        else if(validateDate(dob,"yyyy-MM-dd'T'HH:mm:ssZ")){
+            DateTime currentTime = new DateTime(System.currentTimeMillis());
+            DateTime dateTime = new DateTime(dob);
+            this.age = currentTime.getYear() - dateTime.getYear();
+        }
         if (age < 0) {
             age = 0;
         }

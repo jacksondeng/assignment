@@ -4,11 +4,10 @@ import android.app.Application;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.widget.EditText;
 
-import com.commonsware.cwac.saferoom.SafeHelperFactory;
-import com.gemalto.assignment.GemaltoApi;
+import com.gemalto.assignment.api.GemaltoApi;
 import com.gemalto.assignment.api.GemaltoApiInterface;
+import com.gemalto.assignment.data.DataEncryption;
 import com.gemalto.assignment.db.UserDb;
 import com.gemalto.assignment.repository.UserRepository;
 
@@ -44,10 +43,16 @@ public class DataModule {
         return new UserRepository();
     }
 
+
     @Provides
     @Singleton
-    public GemaltoApi provideGemaltoApi(Application application,GemaltoApiInterface gemaltoApiInterface,
-                                        UserDb userDb,UserRepository userRepository){
-        return new GemaltoApi(application,gemaltoApiInterface,userDb,userRepository);
+    public DataEncryption dataEncryption(){
+        return new DataEncryption();
+    }
+    @Provides
+    @Singleton
+    public GemaltoApi provideGemaltoApi(GemaltoApiInterface gemaltoApiInterface, UserDb userDb,
+                                        UserRepository userRepository, DataEncryption dataEncryption){
+        return new GemaltoApi(gemaltoApiInterface,userDb,userRepository,dataEncryption);
     }
 }

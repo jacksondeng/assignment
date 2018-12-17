@@ -8,14 +8,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.gemalto.assignment.api.GemaltoApi;
 import com.gemalto.assignment.data.User;
-import com.gemalto.assignment.db.UserDb;
-import com.gemalto.assignment.repository.UserRepository;
 import com.jakewharton.rxbinding3.view.RxView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;

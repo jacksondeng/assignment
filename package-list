@@ -1,0 +1,6 @@
+com.gemalto.assignment.api
+com.gemalto.assignment.data
+com.gemalto.assignment.db
+com.gemalto.assignment.di.component
+com.gemalto.assignment.di.module
+com.gemalto.assignment.repository

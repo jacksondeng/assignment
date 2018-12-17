@@ -27,11 +27,6 @@ android {
         sourceCompatibility 1.8
     }
 }
-repositories {
-    maven {
-        url "https://s3.amazonaws.com/repo.commonsware.com"
-    }
-}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -63,9 +58,6 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
     annotationProcessor 'com.android.databinding:compiler:3.1.4'
     kapt "android.arch.persistence.room:compiler:1.1.1"
-
-    // Encryption
-    implementation "com.commonsware.cwac:saferoom:0.4.5"
 
     // Gson
     compile 'com.google.code.gson:gson:2.8.5'

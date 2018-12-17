@@ -15,7 +15,7 @@ import java.util.List;
  * Created by jacksondeng on 15/12/18.
  */
 
-public class RemoteUserRecyclerViewAdapter extends RecyclerView.Adapter<RemoteUserRecyclerViewAdapter.ViewHolder> {
+public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerViewAdapter.ViewHolder> {
     private List<User> users;
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView username;
@@ -36,7 +36,7 @@ public class RemoteUserRecyclerViewAdapter extends RecyclerView.Adapter<RemoteUs
         }
     }
 
-    public RemoteUserRecyclerViewAdapter(List<User> users) {
+    public UserRecyclerViewAdapter(List<User> users) {
         this.users = users;
     }
 

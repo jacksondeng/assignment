@@ -14,11 +14,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+
+import com.gemalto.assignment.api.GemaltoApi;
 import com.jakewharton.rxbinding3.view.RxView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
+
 import dagger.android.AndroidInjection;
 import dagger.android.support.DaggerAppCompatActivity;
 import timber.log.Timber;
@@ -29,8 +33,6 @@ import timber.log.Timber;
 
 public class MainActivity extends DaggerAppCompatActivity {
 
-    @Inject
-    GemaltoApi gemaltoApi;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
@@ -39,7 +41,10 @@ public class MainActivity extends DaggerAppCompatActivity {
     private String gender;
     private EditText multipleUserEt,seedEt;
     private Dialog loadingDialog;
+    private boolean btnClicked = false;
 
+    //@Inject
+    GemaltoApi gemaltoApi;
 
     @Override
     protected void onCreate(Bundle savedBundleInstance){
@@ -47,8 +52,19 @@ public class MainActivity extends DaggerAppCompatActivity {
         AndroidInjection.inject(this);
         setContentView(R.layout.activity_main);
         initViews();
-        gemaltoApi.getUserRepository().getLocalUsers().observe(this,users -> startActivity(new Intent(this,ListStoredUsersActivity.class)));
-        gemaltoApi.getUserRepository().getRemoteUsers().observe(this,users -> startActivity(new Intent(this,ListQueryUsersActivity.class)));
+        gemaltoApi = ((AssignmentApp)getApplicationContext()).gemaltoApi;
+        gemaltoApi.getUserRepository().getLocalUsers().observe(this,users ->{
+                if(btnClicked){
+                    startActivity(new Intent(this,ListStoredUsersActivity.class));
+                    btnClicked = false;
+                }
+        });
+        gemaltoApi.getUserRepository().getRemoteUsers().observe(this,users -> {
+                if(btnClicked){
+                    startActivity(new Intent(this,ListQueryUsersActivity.class));
+                    btnClicked = false;
+                }
+        });
         gemaltoApi.getApiSuccess().observe(this , apiSuccess->{
            if(apiSuccess != null && apiSuccess){
                dismissSpinnerDialog();
@@ -140,12 +156,14 @@ public class MainActivity extends DaggerAppCompatActivity {
     }
 
     private void queryUser(){
+        btnClicked = true;
         showLoadingDialog();
         gemaltoApi.getUsers(gender,getSeed(),getMultiple());
         //gemaltoApi.getUserRepository().getRemoteUsers().call();
     }
 
     private void listStoredUsers(){
+        btnClicked = true;
         gemaltoApi.listStoredUsers();
         //gemaltoApi.getUserRepository().getLocalUsers().call();
     }

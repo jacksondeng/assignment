@@ -1,19 +1,12 @@
-package com.gemalto.assignment;
+package com.gemalto.gemaltoapi.api;
 
-import android.app.Application;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
-import android.content.Intent;
 
-import com.commonsware.cwac.saferoom.SQLCipherUtils;
-import com.gemalto.assignment.api.ApiResponse;
-import com.gemalto.assignment.api.GemaltoApiInterface;
-import com.gemalto.assignment.data.User;
-import com.gemalto.assignment.db.UserDb;
-import com.gemalto.assignment.repository.UserRepository;
+import com.gemalto.gemaltoapi.data.DataEncryption;
+import com.gemalto.gemaltoapi.data.User;
+import com.gemalto.gemaltoapi.db.UserDb;
+import com.gemalto.gemaltoapi.repository.UserRepository;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +18,6 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 /**
  * Created by jacksondeng on 16/12/18.
@@ -36,21 +28,21 @@ public class GemaltoApi {
     private HashMap<String, String> queryParams = new HashMap<>();
     private GemaltoApiInterface gemaltoApiInterface;
     private UserDb userDb;
-    private Context context;
     private UserRepository userRepository;
-    private SingleLiveEvent<Boolean> apiSuccess = new SingleLiveEvent<>();
-    private SingleLiveEvent<Boolean> showNetworkError = new SingleLiveEvent();
+    private DataEncryption dataEncryption;
+    private MutableLiveData<Boolean> apiSuccess = new MutableLiveData<>();
+    private MutableLiveData<Boolean> showNetworkError = new MutableLiveData<>();
 
     @Inject
-    public GemaltoApi(Application application, GemaltoApiInterface gemaltoApiInterface,
-                      UserDb userDb, UserRepository userRepository) {
+    public GemaltoApi(GemaltoApiInterface gemaltoApiInterface, UserDb userDb,
+                      UserRepository userRepository, DataEncryption dataEncryption) {
         this.gemaltoApiInterface = gemaltoApiInterface;
         this.userDb = userDb;
-        this.context = application;
         this.userRepository = userRepository;
+        this.dataEncryption = dataEncryption;
     }
 
-    void getUsers(String gender, String seed, String number) {
+    public void getUsers(String gender, String seed, String number) {
         buildMap(gender, seed, number);
         gemaltoApiInterface.getUsers(queryParams).
                 subscribeOn(Schedulers.io())
@@ -94,16 +86,14 @@ public class GemaltoApi {
         }
     }
 
-    void listStoredUsers(){
-        if(isDbEncrypted()){
-            decryptDb();
-        }
+    public void listStoredUsers(){
         new Thread(() -> {
             List<User> users;
             users = userDb.userDao().listAllUsers();
             Observable.fromIterable(users)
                     .map(user -> {
                         user.setIsStored(1);
+                        dataEncryption.decryptUser(user);
                         return user;
                     })
                     .subscribeOn(Schedulers.io())
@@ -111,65 +101,29 @@ public class GemaltoApi {
                     .subscribe(user -> {
                     });
             userRepository.getLocalUsers().postValue(users);
-            encryptDb();
         }) .start();
     }
 
-    void storeUser(final User user){
-        if(isDbEncrypted()){
-            decryptDb();
-        }
-
+    public void storeUser(final User user){
         new Thread(() -> {
+            dataEncryption.encryptUser(user);
             userDb.userDao().storeUser(user);
             listStoredUsers();
         }).start();
     }
 
-    void deleteUser(final User user){
-        if(isDbEncrypted()){
-            decryptDb();
-        }
-
+    public void deleteUser(final User user){
         new Thread(() -> {
+            dataEncryption.encryptUser(user);
             userDb.userDao().deleteUser(user);
             listStoredUsers();
         }).start();
     }
 
 
-    private boolean isDbEncrypted() {
-        return (SQLCipherUtils.getDatabaseState(context, userDb.getOpenHelper().getDatabaseName())
-                == SQLCipherUtils.State.ENCRYPTED);
-    }
 
-    public boolean checkDataBase() {
-        String filePath = context.getApplicationInfo().dataDir+"/databases/user_db";
-        File databaseFile = new File(filePath);
-        return databaseFile.exists();
-    }
 
-    private void encryptDb() {
-        try {
-            SQLCipherUtils.encrypt(context, userDb.getOpenHelper().getDatabaseName()
-                    , "gemaltoassignment2018".toCharArray());
-        } catch (IOException e) {
-            Timber.d("DatabaseState  " + e.toString());
-        }
-    }
-
-    private void decryptDb(){
-        String filePath = context.getApplicationInfo().dataDir+"/databases/user_db";
-        File databaseFile = new File(filePath);
-        try {
-            SQLCipherUtils.decrypt(context, databaseFile
-                    , "gemaltoassignment2018".toCharArray());
-        } catch (IOException e) {
-            Timber.d("DatabaseState  " + e.toString());
-        }
-    }
-
-    UserRepository getUserRepository(){
+    public UserRepository getUserRepository(){
         return userRepository;
     }
 

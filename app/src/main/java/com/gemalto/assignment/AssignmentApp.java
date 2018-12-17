@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.arch.persistence.room.Room;
 
+import com.gemalto.assignment.api.GemaltoApi;
 import com.gemalto.assignment.db.UserDb;
 import com.gemalto.assignment.di.component.DaggerAssignmentAppComponent;
 
@@ -25,7 +26,8 @@ public class AssignmentApp extends Application implements HasActivityInjector{
 
     @Inject
     DispatchingAndroidInjector<Activity> dispatchingAndroidInjector;
-    private UserDb userDb;
+    @Inject
+    GemaltoApi gemaltoApi;
 
     @Override
     public DispatchingAndroidInjector<Activity> activityInjector() {
@@ -52,11 +54,10 @@ public class AssignmentApp extends Application implements HasActivityInjector{
                 .application(this)
                 .build()
                 .inject(this);
-
     }
 
-
-    public UserDb getUserDb() {
-        return userDb;
+    public GemaltoApi GegetGemaltoApi(){
+        return gemaltoApi;
     }
+
 }

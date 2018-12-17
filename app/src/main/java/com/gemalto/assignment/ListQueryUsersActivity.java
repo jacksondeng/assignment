@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.gemalto.assignment.api.GemaltoApi;
 import com.gemalto.assignment.data.User;
 
 import java.util.List;
@@ -56,7 +57,7 @@ public class ListQueryUsersActivity extends DaggerAppCompatActivity {
 
 
     private void setRecyclerView(List<User> users){
-        mAdapter = new RemoteUserRecyclerViewAdapter(users);
+        mAdapter = new UserRecyclerViewAdapter(users);
         recyclerView.setAdapter(mAdapter);
     }
 

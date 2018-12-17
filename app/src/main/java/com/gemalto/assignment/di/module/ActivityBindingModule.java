@@ -26,4 +26,5 @@ public abstract class ActivityBindingModule {
 
     @ContributesAndroidInjector
     abstract ListStoredUsersActivity contributeToListStoredUsersActivity();
+
 }

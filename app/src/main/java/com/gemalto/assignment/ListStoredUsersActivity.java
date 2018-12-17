@@ -7,8 +7,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.gemalto.assignment.api.GemaltoApi;
 import com.gemalto.assignment.data.User;
-import com.gemalto.assignment.repository.UserRepository;
 
 import java.util.List;
 
@@ -34,7 +34,6 @@ public class ListStoredUsersActivity extends AppCompatActivity {
         AndroidInjection.inject(this);
         setContentView(R.layout.activity_list_stored_users);
         initViews();
-        Timber.d("UserRepo " +gemaltoApi.getUserRepository().hashCode());
     }
 
     @Override
@@ -60,7 +59,7 @@ public class ListStoredUsersActivity extends AppCompatActivity {
 
 
     private void setRecyclerView(List<User> users){
-        mAdapter = new RemoteUserRecyclerViewAdapter(users);
+        mAdapter = new UserRecyclerViewAdapter(users);
         recyclerView.setAdapter(mAdapter);
     }
 
